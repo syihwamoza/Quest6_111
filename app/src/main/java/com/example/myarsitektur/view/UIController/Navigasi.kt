@@ -20,3 +20,41 @@ enum class Navigasi {
     Formulirku,
     Detail
 }
+
+@Composable
+fun DataApp(
+    navControlller: NavHostController = rememberNavController(),
+    modifier: Modifier,
+    viewModel: SiswaViewModel = viewModel ()
+) {
+    Scaffold { isiRuang ->
+        val uiState = viewModel.statusUI.collectAsState()
+        NavHost(
+            navController = navControlller,
+            startDestination = Navigasi.Formulirku.name,
+
+            modifier = Modifier.padding(isiRuang)) {
+            composable(route = Navigasi.Formulirku.name) {
+                val konteks = LocalContext.current
+                FormSiswa(
+                    pilihanJK = JenisK.map{ id -> konteks.resources.getString(id)},
+                    onSubmitButtonClicked = {
+                        viewModel.setSiswa(it)
+                        navControlller.navigate(Navigasi.Detail.name)
+                    }
+                )
+            }
+            // Halaman kedua → TampilData
+            composable(route = Navigasi.Detail.name) {
+                TampilSiswa (
+                    statusUISiswa = uiState.value,
+                    onBackButtonClicked = {
+                        cancelAndBackToFormulirku(navControlller)
+                    }
+                )
+            }
+        }
+    }
+}
+
+
